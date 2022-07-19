@@ -1,21 +1,57 @@
-version: '3'
+version: "3"
 
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-13}-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
-      POSTGRES_USER: ${POSTGRES_USER:-symfony}
-    volumes:
-      - db-data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+    php:
+        build:
+            context: .
+        depends_on:
+            - database
+        restart: unless-stopped
+        volumes:
+            - php_socket:/var/run/php
+            # - ./api/var/log:srv/api/var/log
+        healthcheck:
+            interval: 10s
+            timeout: 3s
+            retries: 3
+            start_period: 30s
+        environment:
+            DATABASE_URL: postgresql://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD:-root}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-13}
+            TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
+        ports:
+            - 8000:80
+
+    ###> doctrine/doctrine-bundle ###
+    database:
+        image: postgres:${POSTGRES_VERSION:-13}-alpine
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB:-app}
+            # You should definitely change the password in production
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
+            POSTGRES_USER: ${POSTGRES_USER:-symfony}
+        volumes:
+            - db-data:/var/lib/postgresql/data:rw
+            # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+            # - ./docker/db/data:/var/lib/postgresql/data:rw
+    ###< doctrine/doctrine-bundle ###
+
+    pgadmin:
+        image: dpage/pgadmin4
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@lesbos.com}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+            PGADMIN_CONFIG_SERVER_MODE: "False"
+        volumes:
+            - pgadmin-data:/var/lib/pgadmin
+        ports:
+            - 8080:80
+        restart: always
+        depends_on:
+            - database
 
 volumes:
-###> doctrine/doctrine-bundle ###
-  db-data:
+    php_socket:
+    ###> doctrine/doctrine-bundle ###
+    db-data:
+    pgadmin-data:
 ###< doctrine/doctrine-bundle ###
