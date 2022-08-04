@@ -4,12 +4,16 @@ services:
     php:
         build:
             context: .
+            dockerfile: ./docker/php/Dockerfile
         depends_on:
             - database
         restart: unless-stopped
         volumes:
+            - type: bind
+              source: .
+              target: /var/www/
+            - ./var/log:/var/www/var/log
             - php_socket:/var/run/php
-            # - ./api/var/log:srv/api/var/log
         healthcheck:
             interval: 10s
             timeout: 3s
@@ -20,15 +24,18 @@ services:
             TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
         ports:
             - 8000:80
+        # tty: true
+        # stdin_open: true
 
     ###> doctrine/doctrine-bundle ###
     database:
         image: postgres:${POSTGRES_VERSION:-13}-alpine
+        container_name: postgres_container
         environment:
             POSTGRES_DB: ${POSTGRES_DB:-app}
             # You should definitely change the password in production
-            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
-            POSTGRES_USER: ${POSTGRES_USER:-symfony}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+            POSTGRES_USER: ${POSTGRES_USER:-root}
         volumes:
             - db-data:/var/lib/postgresql/data:rw
             # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
