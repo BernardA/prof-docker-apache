@@ -1,0 +1,2 @@
+CREATE SCHEMA IF NOT EXISTS test AUTHORIZATION root;
+ALTER USER root SET search_path TO test;

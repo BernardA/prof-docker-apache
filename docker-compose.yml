@@ -20,17 +20,20 @@ services:
             retries: 3
             start_period: 30s
         environment:
-            DATABASE_URL: postgresql://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD:-root}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-13}
+            APP_ENV: dev
+            DATABASE_URL: postgresql://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD:-root}@postgres_container:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-13}
             TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
         ports:
             - 8000:80
-        # tty: true
-        # stdin_open: true
+        networks:
+            - sesamenet
 
     ###> doctrine/doctrine-bundle ###
     database:
         image: postgres:${POSTGRES_VERSION:-13}-alpine
         container_name: postgres_container
+        ports:
+            - 5434:5432
         environment:
             POSTGRES_DB: ${POSTGRES_DB:-app}
             # You should definitely change the password in production
@@ -38,8 +41,11 @@ services:
             POSTGRES_USER: ${POSTGRES_USER:-root}
         volumes:
             - db-data:/var/lib/postgresql/data:rw
+            - ./docker/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
             # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
             # - ./docker/db/data:/var/lib/postgresql/data:rw
+        networks:
+            - sesamenet
     ###< doctrine/doctrine-bundle ###
 
     pgadmin:
@@ -55,6 +61,11 @@ services:
         restart: always
         depends_on:
             - database
+        networks:
+            - sesamenet
+networks:
+    sesamenet:
+        driver: bridge
 
 volumes:
     php_socket:

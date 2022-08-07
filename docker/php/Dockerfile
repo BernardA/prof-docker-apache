@@ -19,18 +19,18 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 COPY docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
 
-ENV SYMFONY_PHPUNIT_VERSION=9
-
 COPY . /var/www
 
 WORKDIR /var/www
 
-RUN mkdir -p var/cache var/log
-RUN chmod -R 777 ./var/cache && chmod -R 777 ./var/log
-
 RUN composer install --prefer-dist --no-progress --no-interaction
 
-# RUN php bin/console doctrine:migrations:migrate --no-interaction
-# ENTRYPOINT ["docker-entrypoint"]
+# RUN chmod +x bin/console
+
+ENTRYPOINT ["docker-entrypoint"]
+
+CMD ["apachectl", "-D", "FOREGROUND"]
+
+RUN chmod -R 777 ./var/cache && chmod -R 777 ./var/log
 
 

@@ -27,6 +27,15 @@ class Greeting
     #[ORM\Column(nullable: true)]
     private ?int $times = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $newField = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $anotherField = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $newField2 = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,6 +85,42 @@ class Greeting
     public function setTimes(?int $times): self
     {
         $this->times = $times;
+
+        return $this;
+    }
+
+    public function getNewField(): ?string
+    {
+        return $this->newField;
+    }
+
+    public function setNewField(?string $newField): self
+    {
+        $this->newField = $newField;
+
+        return $this;
+    }
+
+    public function getAnotherField(): ?string
+    {
+        return $this->anotherField;
+    }
+
+    public function setAnotherField(string $anotherField): self
+    {
+        $this->anotherField = $anotherField;
+
+        return $this;
+    }
+
+    public function getNewField2(): ?string
+    {
+        return $this->newField2;
+    }
+
+    public function setNewField2(string $newField2): self
+    {
+        $this->newField2 = $newField2;
 
         return $this;
     }
