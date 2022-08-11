@@ -36,6 +36,9 @@ class Greeting
     #[ORM\Column(length: 255)]
     private ?string $newField2 = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $newField3 = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -121,6 +124,18 @@ class Greeting
     public function setNewField2(string $newField2): self
     {
         $this->newField2 = $newField2;
+
+        return $this;
+    }
+
+    public function getNewField3(): ?string
+    {
+        return $this->newField3;
+    }
+
+    public function setNewField3(string $newField3): self
+    {
+        $this->newField3 = $newField3;
 
         return $this;
     }
